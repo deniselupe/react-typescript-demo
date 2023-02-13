@@ -44,20 +44,53 @@
     GreetProps add a new key 'isLoggedIn', and set it to the type of boolean.
 */
 
+/*
+    Advanced Props
+
+    Let's say we don't want to require the messageCount prop. How do we make the messageCount prop optional?
+
+    To make the prop optional, we need to add a question mark to the end of the prop name where we defined it's type.
+
+    Before:
+    interface GreetProps {
+        name: string;
+        messageCount: number;
+        isLoggedIn: boolean;
+    };
+
+    After:
+    interface GreetProps {
+        name: string;
+        messageCount?: number;
+        isLoggedIn: boolean;
+    };
+
+    The JSX will still need a {props.messageCount} value to render in it's <h2> string, 
+    so what do we print in the case that a messageCount prop was not passed to the <Greet /> component?
+
+    Inside the Greet component, define the following default value:
+    const { messageCount = 0 } = props;
+
+    If a user does not provide a messageCount prop to the <Greet /> component, then when we are destructuring 
+    for the messageCount prop, we assign it to the value of 0 if no value is found.
+*/
+
 interface GreetProps {
     name: string;
-    messageCount: number;
+    messageCount?: number;
     isLoggedIn: boolean;
 };
 
 export const Greet = (props: GreetProps) => {
+    const { messageCount = 0 } = props;
+
     return (
         <div>
             <h2>
                 {
                     props.isLoggedIn 
                     ?
-                    `Welcome {props.name}! You have {props.messageCount} messages`
+                    `Welcome ${props.name}! You have ${messageCount} messages`
                     :
                     'Welcome Guest'
                 }
