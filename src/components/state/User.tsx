@@ -1,63 +1,45 @@
 /*
-    useState Future Value
+    useState Type Assertion
 
-    This lesson we will cover how to write useEffects in TypeScript
-    when you don't know what the initial value of a state variable is and would
-    like to give it a value in the future.
+    In the previous lesson we learned how to type the userState hook
+    when the initial value type is different from the future value type.
 
-    This User component has two buttons login and logout whose handlers are to be 
-    defined once again. 
+    We specified that the state type can be null or AuthUser.
 
-    We also have a <div> tags which are supposed to render the logged in user's name
-    and email address.
+    But when we do specify null as one of the possible values, we always have 
+    to make a check in our code that 'user' is not null before accessing the 
+    'name' and 'email' properties.
 
-    Above the component we have defined the type of the logged in user. It is an object 
-    with name and email as properties.
+    This of course is the right thing to do, but sometimes, you, as the developer
+    would know that 'user' would be set to the correct value very soon after the component 
+    mounts, and will never be null in the future.
 
-    Within the component we have also invoked the useState hook. 'user' is the state varaible and 'setUser' 
-    is the setter function.
+    For example, you would set the 'user' in the useEffect hook, and let's also assume that you
+    cannot logout. In such cases, you can, if you want to, use Type Assertion to let TypeScript 
+    know that 'user' is always of type AuthUser and wont be null. 
 
-    Let us now finish this component and userstand how to make it work with TypeScript.
+    For Type Assertion, we use the 'as' keyword. So instead of specifying <AuthUser | null> 
+    for the useState type, we can specify just <AuthUser>, and for the initial value we set an
+    empty object 'as' AuthUser.
 
-    When a user visits our website they are not logged in by default. 
-    When that is the case, a very common thing to do is initialize useState with null.
+    Before:
+    const [user, setUser] = useState<AuthUser | null>(null);
 
-    Let's do the same.
+    After:
+    const [user, setUser] = useState<AuthUser>({} as AuthUser);
 
-    We should also set the users state to null when the user logs out so.
+    This will now allow us to access the 'name' and 'email' properties in the JSX 
+    without a check for null. 
 
-    When the user clicks on the login button, we want to set the name and email properties.
-    Of course those values would be provided by the user, but for our example, let's hardcode it.
+    So now you can do the following without the optional chaining operator:
 
-    const handleLogin = () => {
-        // Normally the name and email props will be set by the user, but for this example we'll hardcode it
-        setUser({
-            name: 'Denise',
-            email: 'denise@example.com'
-        });
-    };
+    Before:
+    <div>User name is {user?.name}</div>
+    <div>User email is {user?.email}</div>
 
-    However, setting the prop this way would cause TypeScript to give us an error that says:
-    "Argument of type '{ name: string; email: string; }' is not assignable to parameter of type '(prevState: null) => null'."
-
-    So what has happened here is that TypeScript has inferred the type of 'user' to be null because of the
-    initial value that we have specified. So now when we try to assign user an object of type AuthUser, 
-    TypeScript is not happy. It is telling us "Hey, you told me that the user is of type null, so I can't
-    let you pass it a non-null value to the setter function."
-
-    How to pacify TypeScript:
-        - We need to specify the type for the useState hook and not rely on TypeScript inference.
-          We specify state type by including angle brackets after the useState keyword. Within the angle 
-          brackets, we specify that they type can be either null, or, AuthUser. You'll specify this in the 
-          angle brackets using a Union.
-
-          Before:
-          const [user, setUser] = useState(null);
-
-          After:
-          const [user, setUser] = useState<AuthUser | null>(null);
-
-          TypeScript is now happy once again.
+    After:
+    <div>User name is {user.name}</div>
+    <div>User email is {user.email}</div>
 */
 
 import { useState } from 'react';
@@ -68,8 +50,20 @@ interface AuthUser {
 };
 
 export const User = () => {
-    // The initial value of user will be null, but in the future can be changed to an AuthUser type
-    const [user, setUser] = useState<AuthUser | null>(null);
+    /*
+        The initial value of user is an empty object, but we as the developer know that it will very soon be set to the correct value
+        
+        We set the empty as type AuthUser because we trust that 'user' will never be set to null
+        
+        Basically we are saying "We know better than the compiler." We are in fact lying to TypeScript that empty object is of type AuthUser
+        
+        If you're confident that user will be initialized soon after set up, and will always have a value after, you can use
+        Type Assertion like you see here. If not, it's better to leave it like before. 
+
+        Type Assertion is something you could potentially come across in a code base, so make sure you 
+        aware of it.
+    */ 
+    const [user, setUser] = useState<AuthUser>({} as AuthUser);
 
     const handleLogin = () => {
         // Normally the name and email props will be set by the user, but for this example we'll hardcode it
@@ -79,31 +73,17 @@ export const User = () => {
         });
     };
 
-    const handleLogout = () => {
-        // In the handler log out function we call setUser passing in null
-        setUser(null);
-    };
+    // In this example we are commenting out handleLogout as we do not plan to set 'user' to null
+    // const handleLogout = () => {
+    //     // In the handler log out function we call setUser passing in null
+    //     setUser(null);
+    // };
 
     return (
         <div>
             <button onClick={handleLogin}>Login</button>
-            <button onClick={handleLogout}>Logout</button>
-            {/*
-                We can now use autocomplete to interpolate user.name and user.email. If you use
-                autocomplete, you will see that the editor will give it the ?. optional chaining 
-                operator. 
-
-                And this is because the user can be null. So only if user exists, access the name 
-                and email properties.
-
-                Also if you try to get rid of this optional chaining, TypeScript is going to complain 
-                again with: "Object is possibly null", so you always have to check if the object 
-                exists before accessing properties.
-
-                The <User /> component is now complete.
-            */}
-            <div>User name is {user?.name}</div>
-            <div>User email is {user?.email}</div>
+            <div>User name is {user.name}</div>
+            <div>User email is {user.email}</div>
         </div>
     );
 };
