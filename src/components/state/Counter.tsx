@@ -1,95 +1,62 @@
 /*
-    useReducer Hook
+    useReducer Strict Action Types
 
-    For this example, we have created a file Counter.tsx.
+    In the previous lesson we learned how to type useReducer hook.
 
-    Within the state/ folder from before. This file contains a simple count component.
+    Although we have no errors in the moment we do have a small problem.
+    The 'action.type' type in CounterAction is set to string, which means that instead of 'increment', you can
+    set an 'action.type' to any string and not trigger any errors. 
 
-    To maintain the count state and updations to the counter value, we have included the useReducer 
-    hook.
+    Of course we do have a default case to handle this scenario, but why should we as the developer 
+    restrict the 'action.type'?
 
-    We have the 'initialState', which is an object with property 'count' set to 0.
-    Then we have the 'reducer', which is responsible for updating the state. The 'reducer' accepts 
-    'state' and 'action' as parameteres, and based on the 'action.type', updates the 'count' value.
+    Let's learn to do just that. 
 
-    If 'action.type' is 'increment', 'count' is incremented by a 'action.payload' specified in the dispatch()
-    parameter (i.e., { type: 'increment', payload: 10 }). If 'action.type' is decrement, we substract 'action.payload' from 
-    the current 'count' value. Default case, we return the state as-is.
-
-    Next, the <Counter /> component itself. We call the useReducer hook, passing in the 'reducer' function and the 'initialState', 
-    which returns the 'state' and dispatch() for use in our component. 
-
-    In the JSX we display the count value, and we also have two buttons to update the count value. 
-    The first button is an 'Increment 10' button, which onClick dispatches an action of { type: 'increment', payload: 10 }.
-    Similarly, we have the 'Decrement 10' button, which onClick dispatches an action of { type: 'decrement', playload: 10 }.
-    A basic counter component.
-
-    Let's now understand how to go about typing the useReducer hook used in this component. 
-
-    Now where do we start? Well that is simple because TypeScript tells us where to start:
-
-        function reducer(state, action) {
-            switch(action.type) {
-                case 'increment':
-                    return { count: state.count + action.payload };
-                case 'decrement':
-                    return { count: state.count - action.payload };
-                default: 
-                    return state;
-            }
-        }
-
-    We see the red squiggly line in our 'reducer' function's 'state' and 'action' parameters. We need to specify the type of 
-    'state' as well as 'action'. Let's start with the 'state'. 'state' is an object with one property, 'count', whose 
-    value is a number. So we can create an interface to define the type for the state:
-    
-        interface CounterState {
-            count: number;
-        };
-
-    And then we specify that 'reducer' function's 'state' parameter is of type 'CounterState'.
-    This fixes the first squiggly line on 'reducer' function's 'state' parameter.
+    We know that the <Counter /> reducer function is primarily dealing with increment and decrement as 
+    the 'action.type'. So what we an do is implement template literals instead of string as the 
+    'action.type' type.
 
         Before:
-        function reducer(state, action) {
-            switch(action.type) {
-                case 'increment':
-                    return { count: state.count + action.payload };
-                case 'decrement':
-                    return { count: state.count - action.payload };
-                default: 
-                    return state;
-            }
-        }
+            interface CounterAction {
+                type: string;
+                payload: number;
+            };
 
-        After:
-        function reducer(state: CounterState, action) {
-            switch(action.type) {
-                case 'increment':
-                    return { count: state.count + action.payload };
-                case 'decrement':
-                    return { count: state.count - action.payload };
-                default: 
-                    return state;
-            }
-        }
-    
-    Let's move on to the second 'reducer' function parameter 'action'. If you take a look at 
-    the 'reducer' function body, we can sort of figure out the structure of the 'action' parameter. 
-    If seems that the 'action' parameter is an object with two object properties 'type' (which seems to be a string)
-    and 'payload' (which seems to be a number).
+        After: 
+            interface CounterAction {
+                type: 'increment' | 'decrement';
+                payload: number;
+            };
 
-    Let's create an interface for the 'action' parameter and see if this makes the error go away:
+    And as soon as we change this we can see that TypeScript will flag an error for JSX like:
+        <button onClick={() => dispatch({ type: 'reset', payload: 10 })}>Increment 10</button>
 
+    You would get an error that says:
+        "Type 'reset' is not assignable to type 'increment' | 'decrement'"
+
+    Our types for 'action.type' is much more strict now. 
+
+    However, we are not quite done yet with our useReducer hook. 
+
+    Let's say our <Counter /> component should also have a 'reset' functionality. Let's add a 
+    'reset' template literal to the CounterAction.type union.
+
+        Before:
         interface CounterAction {
-            type: string;
+            type: 'increment' | 'decrement';
             payload: number;
         };
 
-    Now let's set the type of 'reducer' function's 'action' parameter to CounterAction interface.
+        After:
+        interface CounterAction {
+            type: 'increment' | 'decrement' | 'reset';
+            payload: number;
+        };
 
-        Before:
-        function reducer(state: CounterState, action) {
+    Next, let's handle the reset type in the 'reducer' function.
+
+        Before: 
+        function reducer(state: CounterState, action: CounterAction) {
             switch(action.type) {
                 case 'increment':
                     return { count: state.count + action.payload };
@@ -107,40 +74,105 @@
                     return { count: state.count + action.payload };
                 case 'decrement':
                     return { count: state.count - action.payload };
+                case 'reset':
+                    return initialState;
                 default: 
                     return state;
             }
         }
 
-    TypeScript is now happy. And guess what? This is all we have to do to type the 
-    userReducer hook. This is again because of Type Inference. In the <Counter /> component if 
-    you hover over 'state', you can see that TypeScript inferes that 'state' is of type 'CounterState', 
-    and if you hover over 'dispatch()' the type is React.Dispatch<CounterAction>.
+    Finally, let's add a button in the JSX to dispatch the reset event:
+        <button onClick={() => dispatch({ type: 'reset' })}>Reset Increment</button>
 
-    TypeScript figured this out from the 'reducer' function that we passed into the useReducer hook. 
-    As mentioned before, this is an example of how TypeScript requires your help only when it is absolutely 
-    necessary. Other times TypeScript hardly needs your intervention, and will figure out the types on its own.
+    When we do this though, we get an error that says:
+        "Argument of type '{ type: "reset"; }' is not assignable to parameter of type 'CounterAction'.
+        Property 'payload' is missing in type '{ type: "reset"; }' but required in type 'CounterAction'"
 
-    Let's make sure that Type Checking works as expected. On the first button click, if we dispatch an action of 
-    boolean type, TypeScript gives us an error. A red squiggly line shows on the 'type' property and the error message says: 
-        "Type 'boolean' is not assignable to type 'string'.ts(2322) Counter.tsx(137, 5): The expected type comes from 
-        property 'type' which is declared here on type 'CounterAction'"
+    If we take a look in our switch statement, we don't have a payload do we? Well, this is because we don't 
+    need a 'action.payload' property to reset the 'state' back to initialState.
 
-        <button onClick={() => dispatch({ type: false, payload: 10 })}>Increment 10</button>
+    We could pass a 'payload' property for the reset button, and give it a value of 0, and change the Switch case, 
+    but if you have a complex state object, it might not be feasible. It is always better to just return the initialState. 
 
-    And if we try to change the 'payload' propertie's value to the string '10', we get the following error for the 'payload' property:
-        "Type 'string' is not assignable to type 'number'.ts(2322) Counter.tsx(143, 5): The expected type comes from property 
-        'payload' which is declared here on type 'CounterAction'"
+    So how do we tell TypeScript that the 'action.payload' property is not mandatory when dispatching { type: 'reset' }?
 
-        <button onClick={() => dispatch({ type: 'increment', payload: '10' })}>Increment 10</button>
+    We have to make the 'payload' property an optional type. We declare 'payload' as an optional property in the 
+    CounterAction interface definition.
 
-    
-    We have successfully typed the useReducer hook. And on a side note, if you ever come across the need to pass in state
-    and dispatch as props to a component, simply hover over 'state' or 'dispatch', copy the type which VSCode shows in the 
-    tooltip, and use it as the prop type for the component receiving 'state' and 'dispatch' as props.
+        Before:
+            interface CounterAction {
+                type: 'increment' | 'decrement' | 'reset';
+                payload: number;
+            };
 
-    Alright, so our code here works fine, but let me tell you that we can be more strict when it comes 
-    to the 'action' type of the reducer function. Let's this discuss that further in the next lesson.
+        After: 
+        interface CounterAction {
+            type: 'increment' | 'decrement' | 'reset';
+            payload?: number;
+        };
+
+    When we do this though, we get another error. Red squiggly lines appear on 
+    'action.payload' for the switch statement's 'increment' and 'decrement' cases. 
+
+    The error on these 'action.payload' lines say: "Object is possibly 'undefined'."
+
+    So for 'increment' and 'decrement' cases, TypeScript is now unhappy that we have 
+    told it 'payload' is optional, in which case it might be undefined, but we are trying to 
+    add it with the 'count' value.
+
+    Now you could fix this the old school JavaScript way by using '(action.payload || 0)', but this 
+    doesn't feel nice does it? Personally not recommended.
+
+        function reducer(state: CounterState, action: CounterAction) {
+            switch(action.type) {
+                case 'increment':
+                    return { count: state.count + (action.payload || 0) };
+                case 'decrement':
+                    return { count: state.count - (action.payload || 0) };
+                case 'reset':
+                    return initialState;
+                default: 
+                    return state;
+            }
+        }
+
+    Here is a good way to type our 'action'.
+
+    We begin by creating a new 'action' type. Let's call it Update Action.
+    This UpdateAction type is only responsible for only 'increment' and 'decrement'
+    actions. We will also make 'payload' mandatory in UpdateAction type.
+
+        interface UpdateAction {
+            type: 'increment' | 'decrement';
+            payload: number;
+        };
+
+    Let us also create a second action type. Let's call it ResetAction, which is responsible
+    only for the reset action. Here we ignore the payload.
+
+        interface ResetAction {
+            type: 'reset';
+        };
+
+    Finally, we set CounterAction as being equal to UpdateAction or ResetAction. This will require
+    making use of the Type Alias syntax and not interface syntax.
+
+        Before:
+            interface CounterAction {
+                type: 'increment' | 'decrement' | 'reset';
+                payload?: number;
+            };
+
+        After:
+            type CounterAction = UpdateAction | ResetAction;
+
+    TypeScript is now happy once more.
+
+    We now have 'increment' and 'decrement' with a 'payload' property, but 
+    'reset' without a 'payload'.
+
+    Now this feature of creating the UpdateAction, ResetAction, and assigning CounterAction = UpdateAction | ResetAction 
+    is called Discriminated Unions in TypeScript. This is the recommended approach for typing reducer functions.
 */
 
 import { useReducer } from 'react';
@@ -149,10 +181,16 @@ interface CounterState {
     count: number;
 };
 
-interface CounterAction {
-    type: string;
+interface UpdateAction {
+    type: 'increment' | 'decrement';
     payload: number;
 };
+
+interface ResetAction {
+    type: 'reset';
+};
+
+type CounterAction = UpdateAction | ResetAction;
 
 const initialState = { count: 0 };
 
@@ -162,6 +200,8 @@ function reducer(state: CounterState, action: CounterAction) {
             return { count: state.count + action.payload };
         case 'decrement':
             return { count: state.count - action.payload };
+        case 'reset':
+            return initialState;
         default: 
             return state;
     }
@@ -175,6 +215,7 @@ function Counter() {
             Count: {state.count}
             <button onClick={() => dispatch({ type: 'increment', payload: 10 })}>Increment 10</button>
             <button onClick={() => dispatch({ type: 'decrement', payload: 10 })}>Decrement 10</button>
+            <button onClick={() => dispatch({ type: 'reset' })}>Reset Increment</button>
         </>
     );
 }
