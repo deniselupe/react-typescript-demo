@@ -1,20 +1,18 @@
-import './App.css';
-import Counter from './components/state/Counter';
-
 /*
-    useReducer Hook
+    useContext Hook
 
-    In the previous few lessons, we learned how to work with TypeScript and 
-    the useState hook. useState hook is great for simple state values. However, if you have 
-    complex state logic where the next state depends on the previous state, useReducer is preferrable.
-
-    Let's learn how to use TypeScript with useReducer.
+    Step 3: Wrap the <Box /> component in <ThemeContextProvider />
 */
+
+import './App.css';
+import Box from './components/context/Box';
+import { ThemeContextProvider } from './components/context/ThemeContext';
 
 function App() {
     return(
         <div className='App'>
-            <Counter />
+            {/* In the JSX invoke <ThemeContextProvider/>  with <Box /> as the children */}
+            <ThemeContextProvider><Box /></ThemeContextProvider>
         </div>
     );
 }
