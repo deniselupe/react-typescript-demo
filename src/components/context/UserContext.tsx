@@ -101,6 +101,97 @@
 
     Step 5:
     We make use of the UserContext inside the User.tsx file.
+
+    Optional Step 6:
+    At the moment you can see that <User /> has to check if userContext exists everytime 
+    we need to use its value. We also have to use optional chaining in the <User /> JSX because
+    userContext may potentially be null, and userContext.user may also potentially be null.
+
+    Because UseContext's value is initially set to null, but then right immediately afterwards
+    the value is set to a UserContextType object, if we wanted to, we can change the code to where <User /> doesn't have 
+    to check for the existance of userContext everytime it needs to make use of it's value.
+
+    Keep in mind that we cannot change the code to do the same for useContext.user though, and this is 
+    because userContext.user needs to be able to transition because an AuthUser type or null type.
+
+    So let's go ahead and change how UseContext's type is defined initially using Type Assertion.
+
+    As a reminder, using Type Asserion is telling TypeScript "Hey I know better, and this value is
+    of type _____". It's our way to lie to TypeScript.
+
+    So when creating UserContext, we can change createContext to be of type <UserContextType> and 
+    assign it to ({} as UserContextType).
+    
+        Before:
+            export const UserContext = createContext<UserContextType | null>(null);
+
+        After:
+            export const UserContext = createContext<UserContextType>({} as UserContextType);
+
+    Actually, due to Type Inferencing, you can also rewrite it like this:
+        export const UserContext= createContext({} as UserContextType);
+
+    After making this change, we can now remove the if statements from <User /> and remove the 
+    optional chaining operator ?. from the <User />'s JSX.
+
+    Before:
+        function User() {
+            const userContext = useContext(UserContext);
+
+            const handleLogin = () => {
+                if (userContext) {
+                    userContext.setUser({
+                        name: 'Denise',
+                        email: 'denise@example.com'
+                    });
+                }
+            };
+
+            const handleLogout = () => {
+                if (userContext) {
+                    userContext.setUser(null);
+                }
+            };
+
+            return (
+                <div>
+                    <button onClick={handleLogin}>Login</button>
+                    <button onClick={handleLogout}>Logout</button>
+                    <h2>User name is {userContext?.user?.name}</h2>
+                    <h2>User email is {userContext?.user?.email}</h2>
+                </div>
+            );
+        }
+
+    After:
+        function User() {
+            const userContext = useContext(UserContext);
+
+            const handleLogin = () => {
+                userContext.setUser({
+                    name: 'Denise',
+                    email: 'denise@example.com'
+                });
+            };
+
+            const handleLogout = () => {
+                userContext.setUser(null);
+            };
+
+            return (
+                <div>
+                    <button onClick={handleLogin}>Login</button>
+                    <button onClick={handleLogout}>Logout</button>
+                    <h2>User name is {userContext.user?.name}</h2>
+                    <h2>User email is {userContext.user?.email}</h2>
+                </div>
+            );
+        }
+
+    This is a pretty common thing to do when working with TypeScript and 
+    Context API. If you think about it, a Context always has to be created outside the component 
+    whereas its future value will be set inside a compoonent. So there is a that gap that needs 
+    to be plugged in and type assertion is how you do it.
 */
 
 import { createContext, useState } from 'react';
@@ -115,7 +206,7 @@ interface UserContextType {
     setUser: React.Dispatch<React.SetStateAction<AuthUser | null>>;
 };
 
-export const UserContext = createContext<UserContextType | null>(null);
+export const UserContext = createContext({} as UserContextType);
 
 
 interface UserContextProviderProps {
@@ -123,24 +214,8 @@ interface UserContextProviderProps {
 };
 
 export const UserContextProvider = ({ children }: UserContextProviderProps) => {
-    // Set the initial state to null to represent logout state, but we know that in the future the user will login
-    // For this reason make sure to type your useState as <AuthUser | null>
     const [user, setUser] = useState<AuthUser | null>(null);
 
-    /* 
-        We want to pass in the state of the logged in user, and the function to login or logout.
-
-        For the <UserContext.Provider> value prop, we will pass in an object that holds 
-        the state of the logged in user, and the setUser function so that the user can login 
-        or logout (the functions for handleLogin and handleLogout will be defined in the User.tsx 
-        component, we're just passing the setter function for the 'user' state variable).
-
-        ES5 Way:
-            value = { user: user, setUser: setUser }
-
-        ES6 Way: 
-            value = { user, setUser }
-    */
     return (
         <UserContext.Provider value={{ user, setUser}}>
             {children}
