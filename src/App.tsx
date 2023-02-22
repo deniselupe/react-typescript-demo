@@ -1,18 +1,18 @@
 /*
-    useContext Hook
+    useContext Future Value
 
-    Step 3: Wrap the <Box /> component in <ThemeContextProvider />
+    Let's learn how to deal with TypeScript and the useContext hook 
+    with a future. 
 */
 
 import './App.css';
-import Box from './components/context/Box';
-import { ThemeContextProvider } from './components/context/ThemeContext';
+import User from './components/context/User';
+import { UserContextProvider } from './components/context/UserContext';
 
 function App() {
     return(
         <div className='App'>
-            {/* In the JSX invoke <ThemeContextProvider/>  with <Box /> as the children */}
-            <ThemeContextProvider><Box /></ThemeContextProvider>
+            <UserContextProvider><User /></UserContextProvider>
         </div>
     );
 }
