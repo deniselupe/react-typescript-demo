@@ -1,20 +1,26 @@
 /*
-    useRef Hook
+    Component Props
 
-    Let's take a look at the final hook, useRef.
+    Let's learn how to pass a component as a prop
+    with React and Typescript.
 
-    When it comes to useRef, there are two scenarios:
-    - As a read-only ref for a DOM element
-    - Or as a mutable value which can behave like an instance variable
+    For this lesson we will be working with the files inside
+    ./components/auth/.
 
-    Let's look at typing for both of those scenarios.
+    The ./components/auth/ folder contains three files:
+        - Login.tsx: Which is a simple component that says "Please login to continue"
+        - Profile.tsx: A component that says "Private Profile Component"
+        - Private.tsx: A component that controls whether a user can view a component or not based on whether they are logged in
 */
 
 import './App.css';
+import Private from './components/auth/Private';
+import Profile from './components/auth/Profile';
 
 function App() {
     return(
         <div className='App'>
+            <Private isLoggedIn={true} component={Profile} />
         </div>
     );
 }
