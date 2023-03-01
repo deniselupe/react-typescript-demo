@@ -1,29 +1,19 @@
 /*
-    This is the <OscarHeader /> component. 
+    <OscarHeader /> has been updated to return <h2>Oscar goes to Leonardo DiCaprio!</h2>. 
+    The string that will be passed in the prop is going to be 'Oscar goes to Leonardo DiCaprio!'. 
 
-    It's job is to accept a children prop of type string, and render it within
-    <h2> tags. 
+    I am going to create an <OscarThree /> that will accept a component as a prop named 
+    'component', and so it's prop type will be set to React.ComponentType.
 
-    I'm going to pass a <OscarHeader>Oscar goes to Leonardo DiCaprio!</OscarHeader>
-    JSX as a children prop to <OscarOne />.
+    I am going to pass 'OscarHeader' as the component prop to <OscarThree />, and then 
+    within <OscarThree /> I am going to render <OscarHeader />.
 
-    <OscarOne /> will have its children component defined as type React.ReactNode.
-
-    I am then going to pass the same <OscarHeader>Oscar goes to Leonardo DiCaprio!</OscarHeader> 
-    JSX as a children prop to <OscarTwo /> which will define it's children prop as of type 
-    JSX.Element. 
-
-    Let's see how to make <OscarOne /> and <OscarTwo /> render without any 
-    TypeScript errors.
+    Let's see how to make <OscarThree /> render without any TypeScript errors.
 */
 
-interface OscarHeaderProps {
-    children: string;
-};
-
-const OscarHeader = ({ children }: OscarHeaderProps) => {
+const OscarHeader = () => {
     return (
-        <h2>{children}</h2>
+        <h2>Oscar goes to Leonardo DiCaprio!</h2>
     );
 };
 
