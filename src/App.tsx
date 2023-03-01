@@ -1,6 +1,6 @@
 import './App.css';
-import OscarHeader from './components/OscarHeader';
-import OscarThree from './components/OscarThree';
+import OscarHeader from './components/practice/OscarHeader';
+import OscarFour from './components/practice/OscarFour';
 
 /*
     React.ReactNode, React.ComponentType, and JSX.Element are all types in React that represent 
@@ -37,7 +37,7 @@ import OscarThree from './components/OscarThree';
 function App() {
     return(
         <div className='App'>
-            <OscarThree component={OscarHeader} />
+            <OscarFour>{OscarHeader}</OscarFour>
         </div>
     );
 }
