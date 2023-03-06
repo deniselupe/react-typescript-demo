@@ -1,6 +1,5 @@
 import './App.css';
-import OscarHeader from './components/practice/OscarHeader';
-import OscarFour from './components/practice/OscarFour';
+import FetchData from './components/practice/FetchData';
 
 /*
     React.ReactNode, React.ComponentType, and JSX.Element are all types in React that represent 
@@ -37,7 +36,7 @@ import OscarFour from './components/practice/OscarFour';
 function App() {
     return(
         <div className='App'>
-            <OscarFour>{OscarHeader}</OscarFour>
+            <FetchData />
         </div>
     );
 }
